@@ -46,7 +46,7 @@ object RestrictedDownloadsService {
   case object FileNotFound extends Error {def en: String = "File not found"}
   case object FileNotAvailableAnymore extends Error {def en: String = "Too late, the file is not available anymore"}
   case object CodeNotCorrect extends Error {def en: String = "The code you provided is not correct"}
-  case object CodeExhaustedLimitUsage extends Error {def en: String = "The code you provided was already used"}
+  case object CodeLimitUsageExhausted extends Error {def en: String = "The code you provided was already used"}
 }
 
 import RestrictedDownloadsService._
@@ -76,7 +76,7 @@ final class RestrictedDownloadsModule[F[_]: Monad](DCR: DownloadCodesRepository[
       (codeState, file) match {
         case (Right(_), Right(r)) => Right(r)
         case (Left(DoesNotExist), _) => Left(CodeNotCorrect)
-        case (Left(UseLimitReached), _) => Left(CodeExhaustedLimitUsage)
+        case (Left(UseLimitReached), _) => Left(CodeLimitUsageExhausted)
         case (_, fileError) => fileError
       }
     }
