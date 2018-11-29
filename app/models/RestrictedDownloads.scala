@@ -19,6 +19,7 @@ object DownloadCodesRepository{
   case object DoesNotExist extends DownloadCodesRepositoryError
   case object UseLimitReached extends DownloadCodesRepositoryError
   sealed trait OK
+  case object ResultOK extends OK
 }
 
 import DownloadCodesRepository._
@@ -51,7 +52,7 @@ final class RestrictedDownloadsModule[F[_]: Monad](DCR: DownloadCodesRepository[
       file <- DFR.getFile(id)
       fileResult = file match {
         case Left(_) => Left("File not found")
-        case Right(f) if f.expiryDate.isAfter(LocalDateTime.now()) => Left("Too late, the file is not available anymore")
+        case Right(f) if f.expiryDate.isBefore(LocalDateTime.now()) => Left("Too late, the file is not available anymore")
         case Right(f) => Right(f.resource)
       }
     } yield fileResult
