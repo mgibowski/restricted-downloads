@@ -39,8 +39,19 @@ trait DownloadFilesRepository[F[_]] {
   def getFile(id: FileId): F[Either[FileNotFound, DownloadableFile]]
 }
 
+object RestrictedDownloadsService {
+  sealed trait Error {
+    def en: String
+  }
+  case object FileNotFound extends Error {def en: String = "File not found"}
+  case object FileNotAvailableAnymore extends Error {def en: String = "Too late, the file is not available anymore"}
+  case object CodeNotCorrect extends Error {def en: String = "The code you provided is not correct"}
+  case object CodeExhaustedLimitUsage extends Error {def en: String = "The code you provided was already used"}
+}
+
+import RestrictedDownloadsService._
+
 trait RestrictedDownloadsService[F[_]]{
-  type Error = String
   def downloadFile(id: FileId, downloadCode: DownloadCode): F[Either[Error, Resource]]
 }
 
@@ -51,8 +62,8 @@ final class RestrictedDownloadsModule[F[_]: Monad](DCR: DownloadCodesRepository[
     for {
       file <- DFR.getFile(id)
       fileResult = file match {
-        case Left(_) => Left("File not found")
-        case Right(f) if f.expiryDate.isBefore(LocalDateTime.now()) => Left("Too late, the file is not available anymore")
+        case Left(_) => Left(FileNotFound)
+        case Right(f) if f.expiryDate.isBefore(LocalDateTime.now()) => Left(FileNotAvailableAnymore)
         case Right(f) => Right(f.resource)
       }
     } yield fileResult
@@ -64,8 +75,8 @@ final class RestrictedDownloadsModule[F[_]: Monad](DCR: DownloadCodesRepository[
     } yield {
       (codeState, file) match {
         case (Right(_), Right(r)) => Right(r)
-        case (Left(DoesNotExist), _) => Left("The code you provided is not correct")
-        case (Left(UseLimitReached), _) => Left("The code you provided was already used")
+        case (Left(DoesNotExist), _) => Left(CodeNotCorrect)
+        case (Left(UseLimitReached), _) => Left(CodeExhaustedLimitUsage)
         case (_, fileError) => fileError
       }
     }

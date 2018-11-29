@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 import models.DownloadFilesRepository.FileNotFound
 import models.RestrictedDownloads.{DownloadCode, DownloadableFile, FileId}
+import models.RestrictedDownloadsService._
 import org.scalatest.Matchers._
 import org.scalatest._
 import scalaz.Scalaz._
@@ -41,7 +42,7 @@ class RestrictedDownloadsModuleTest extends FlatSpec {
     val downloadResult = sut.downloadFile("ok-id", "ok-code")
 
     // Then
-    downloadResult shouldBe Left("Too late, the file is not available anymore")
+    downloadResult shouldBe Left(FileNotAvailableAnymore)
   }
 
 }
