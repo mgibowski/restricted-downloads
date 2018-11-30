@@ -22,10 +22,10 @@ class MongoDownloadCodesRepositorySpec extends PlayWithMongoSpec with BeforeAndA
       codes = reactiveMongoApi.database.map(_.collection("download-codes"))
 
       codes.flatMap(_.insert[DownloadCodeItem](ordered = false).many(List(
-        DownloadCodeItem(fileId = "file1", code = "file1code1"),
-        DownloadCodeItem(fileId = "file1", code = "file1code2"),
-        DownloadCodeItem(fileId = "file1", code = "file1code3"),
-        DownloadCodeItem(fileId = "file2", code = "file1code1"),
+        DownloadCodeItem(fileId = "file1", code = "file1code1", useCount = 1),
+        DownloadCodeItem(fileId = "file1", code = "file1code2", useCount = 2),
+        DownloadCodeItem(fileId = "file1", code = "limitExhausted", useCount = 3),
+        DownloadCodeItem(fileId = "file2", code = "file1code1", useCount = 1),
       )))
     }
   }
@@ -42,7 +42,18 @@ class MongoDownloadCodesRepositorySpec extends PlayWithMongoSpec with BeforeAndA
       val response: Either[DownloadCodesRepository.DownloadCodesRepositoryError, DownloadCodesRepository.OK] = Await.result(f, Duration.Inf)
       response shouldBe Left(DoesNotExist)
     }
-
+    "respond with error when code use limit is exhausted" in {
+      val sut: MongoDownloadCodesRepository = app.injector.instanceOf(classOf[MongoDownloadCodesRepository])
+      val f = sut.isCodeValid("file1", "limitExhausted")
+      val response: Either[DownloadCodesRepository.DownloadCodesRepositoryError, DownloadCodesRepository.OK] = Await.result(f, Duration.Inf)
+      response shouldBe Left(UseLimitReached)
+    }
+    "respond OK when all is fine" in {
+      val sut: MongoDownloadCodesRepository = app.injector.instanceOf(classOf[MongoDownloadCodesRepository])
+      val f = sut.isCodeValid("file1", "file1code1")
+      val response: Either[DownloadCodesRepository.DownloadCodesRepositoryError, DownloadCodesRepository.OK] = Await.result(f, Duration.Inf)
+      response shouldBe 'right
+    }
   }
 
 }

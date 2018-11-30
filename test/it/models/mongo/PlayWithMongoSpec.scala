@@ -9,7 +9,8 @@ trait PlayWithMongoSpec extends PlaySpec with GuiceOneAppPerSuite {
 
   override def fakeApplication = new GuiceApplicationBuilder()
     .configure(
-      "mongodb.uri" -> "mongodb://localhost:27017/restricted-downloads-test"
+      "mongodb.uri" -> "mongodb://localhost:27017/restricted-downloads-test",
+      "app.downloadCodeUseLimit" -> 2
     )
     .build()
 
