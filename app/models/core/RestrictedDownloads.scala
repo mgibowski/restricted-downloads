@@ -1,4 +1,4 @@
-package models
+package models.core
 
 import scalaz._, Scalaz._
 import simulacrum._

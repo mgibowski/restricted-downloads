@@ -1,10 +1,10 @@
-package models
+package models.core
 
 import java.time.LocalDateTime
 
-import models.DownloadFilesRepository.FileNotFound
-import models.RestrictedDownloads.{DownloadCode, DownloadableFile, FileId}
-import models.RestrictedDownloadsService._
+import models.core.DownloadFilesRepository.FileNotFound
+import models.core.RestrictedDownloads.{DownloadCode, DownloadableFile, FileId}
+import models.core.RestrictedDownloadsService._
 import org.scalatest.Matchers._
 import org.scalatest._
 import scalaz.Scalaz._
