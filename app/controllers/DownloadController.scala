@@ -24,8 +24,10 @@ class DownloadController @Inject()(val filesRepo: MongoDownloadFilesRepository,
   val downloadForm = Form(mapping("code" -> nonEmptyText)(DownloadForm.apply)(DownloadForm.unapply))
 
   def download(fileId: FileId) = Action.async(parse.form(downloadForm)) { implicit request =>
+    val code = request.body.code
     for {
-      result <- coreLogic.downloadFile(fileId, request.body.code)
+      result <- coreLogic.downloadFile(fileId, code)
+      _ <- codesRepo.bumpUseLimit(fileId, code)
     } yield {
       result match {
         case Left(FileNotFound) => NotFound("The file you ask for does not exist")
@@ -38,7 +40,7 @@ class DownloadController @Inject()(val filesRepo: MongoDownloadFilesRepository,
             fileName = _ => f.name
           )
       }
-
     }
   }
+
 }

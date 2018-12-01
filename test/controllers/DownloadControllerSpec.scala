@@ -8,12 +8,16 @@ import models.core.RestrictedDownloads.DownloadableFile
 import models.mongo.DownloadCodeItem
 import models.mongo.MongoDownloadFilesRepository._
 import org.scalatest.BeforeAndAfter
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers._
 import play.api.test._
+import reactivemongo.api.ReadPreference
+import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 class DownloadControllerSpec extends PlayWithMongoSpec with Injecting with BeforeAndAfter {
 
@@ -30,6 +34,7 @@ class DownloadControllerSpec extends PlayWithMongoSpec with Injecting with Befor
 
       codes.flatMap(_.insert[DownloadCodeItem](ordered = false).many(List(
         DownloadCodeItem(fileId = "file1", code = "correctCode", useCount = 1),
+        DownloadCodeItem(fileId = "file1", code = "correctCode2", useCount = 1),
         DownloadCodeItem(fileId = "file1", code = "usedCode", useCount = 5),
         DownloadCodeItem(fileId = "file2", code = "correctCode", useCount = 1),
         DownloadCodeItem(fileId = "xyz", code = "codeWithoutFile", useCount = 1)
@@ -67,6 +72,24 @@ class DownloadControllerSpec extends PlayWithMongoSpec with Injecting with Befor
 
       status(result) mustBe OK
       header("Content-Disposition", result).get must include (fileName)
+    }
+
+    "increment code use counter after correctly downloading file" in {
+      val request = FakeRequest(POST, "/download/file1").withFormUrlEncodedBody("code" -> "correctCode2")
+      val result = route(app, request).get
+
+      val f = for {
+        _ <- result
+        collection <- codes
+        code <- collection.find[JsObject, DownloadCodeItem](
+          Json.obj("fileId" -> "file1", "code" -> "correctCode2"))
+          .cursor[DownloadCodeItem](ReadPreference.primary)
+          .headOption
+      } yield code
+
+      status(result) mustBe OK
+      val code = Await.result(f, Duration.Inf)
+      code.get.useCount mustBe 2
     }
 
     "respond with error when file does not exist" in {
