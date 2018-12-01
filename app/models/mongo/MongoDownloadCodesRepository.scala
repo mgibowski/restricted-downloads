@@ -36,6 +36,13 @@ class MongoDownloadCodesRepository @Inject() (val reactiveMongoApi: ReactiveMong
       }
     }
 
+  override def bumpUseLimit(fileId: FileId, code: DownloadCode): Future[Unit] =
+    for {
+      collection <- codes
+      _ <- collection.update[JsObject, JsObject](
+        Json.obj("fileId" -> fileId, "code" -> code),
+        Json.obj("$inc" -> Json.obj("useCount" -> 1)))
+    } yield {}
 }
 
 case class DownloadCodeItem(_id: Option[BSONObjectID] = None, fileId: FileId, code: DownloadCode, useCount: Int)

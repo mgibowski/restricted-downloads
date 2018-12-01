@@ -19,6 +19,7 @@ class RestrictedDownloadsModuleTest extends FlatSpec {
         case (_, "UseLimitReached") => Left(DownloadCodesRepository.UseLimitReached)
         case _ => Right(DownloadCodesRepository.ResultOK)
       }
+    override def bumpUseLimit(fileId: FileId, code: DownloadCode): Scalaz.Id[Unit] = ???
   }
 
   def testFileRepo(expiryDate: LocalDateTime = LocalDateTime.now().plusDays(1)) = new DownloadFilesRepository[Id] {

@@ -26,6 +26,7 @@ import DownloadCodesRepository._
 
 trait DownloadCodesRepository[F[_]] {
   def isCodeValid(id: FileId, code: DownloadCode): F[Either[DownloadCodesRepositoryError,OK]]
+  def bumpUseLimit(fileId: FileId, code: DownloadCode): F[Unit]
 }
 
 object DownloadFilesRepository {
