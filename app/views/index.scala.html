@@ -2,14 +2,26 @@
 @(files: Seq[RestrictedDownloads.DownloadableFile])
 
 @main("Files Download") {
-  @if(files.isEmpty) {
-    <p>Currently there are no files here. Come back soon.</p>
-  }else {
-    <h1>Choose the file you would like to download:</h1>
-    <ul>
-      @files.map{ f=>
-        <li><a href="@routes.HomeController.renderCodeForm(f.fileId)">@f.title</a></li>
-      }
-    </ul>
-  }
+
+  <main role="main">
+    <section class="jumbotron text-center">
+      <div class="container">
+
+        @if(files.isEmpty) {
+
+          <h1 class="jumbotron-heading">No files available</h1>
+          <p class="lead text-muted">Currently there are no files here. Come back soon.</p>
+        }else {
+
+          <h1 class="jumbotron-heading">Choose file to download:</h1>
+
+          @files.map{ f=>
+            <p class="lead text-muted"><a href="@routes.HomeController.renderCodeForm(f.fileId)">@f.title</a></p>
+          }
+        }
+
+      </div>
+    </section>
+  </main>
+
 }
