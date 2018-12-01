@@ -13,12 +13,15 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xfatal-warnings"
 )
 
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
+
 libraryDependencies ++= Seq(
   guice,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
   "com.github.mpilquist" %% "simulacrum"     % "0.13.0",
   "org.scalaz"           %% "scalaz-core"    % "7.2.26",
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.16.0-play26"
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.16.0-play26",
+  "com.adrianhurt" %% "play-bootstrap" % "1.4-P26-B4-SNAPSHOT"
 )
 
 addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.7")

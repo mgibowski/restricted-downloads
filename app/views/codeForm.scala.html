@@ -1,11 +1,25 @@
 @import models.form.CodeForm
 @import models.core.RestrictedDownloads.FileId
-@(fileId: FileId, form: Form[CodeForm])(implicit messagesProvider: MessagesProvider)
+@import helper._
+@(fileId: FileId, form: Form[CodeForm])(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 
 @main("Enter download code") {
 
-  @helper.form(action = routes.DownloadController.download(fileId)) {
-    @helper.inputText(form("code"))
-  }
+  <main role="main">
+    <section class="jumbotron text-center">
+      <div class="container">
+
+        <h1 class="jumbotron-heading">Provide your download code</h1>
+
+        <p class="lead text-muted">To download this file you need to provide your unique code.</p>
+
+        @b4.horizontal.form(CSRF(routes.DownloadController.download(fileId)), "col-md-2", "col-md-10") { implicit hfc =>
+          @b4.text(form("code"), '_label -> "Code:", 'placeholder -> "Type your code here")
+          @b4.submit('class -> "btn btn-secondary") { Download file with this code }
+        }
+
+      </div>
+    </section>
+  </main>
 
 }
