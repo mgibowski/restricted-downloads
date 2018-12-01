@@ -20,8 +20,24 @@ import scala.concurrent.Future
 class MongoDownloadFilesRepository @Inject() (val reactiveMongoApi: ReactiveMongoApi, config: Configuration)
   extends DownloadFilesRepository[Future] with ReactiveMongoComponents{
 
+  lazy val files: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection("download-files"))
+  import MongoDownloadFilesRepository.fmt
+
   override def listFiles: Future[Seq[RestrictedDownloads.DownloadableFile]] = ???
-  override def getFile(id: FileId): Future[Either[FileNotFound, RestrictedDownloads.DownloadableFile]] = ???
+
+  override def getFile(id: FileId): Future[Either[FileNotFound, RestrictedDownloads.DownloadableFile]] =
+    for {
+      collection <- files
+      maybeFile <- collection
+        .find[JsObject, DownloadableFile](Json.obj("fileId" -> id))
+          .cursor[DownloadableFile](ReadPreference.primary)
+          .headOption
+    } yield {
+      maybeFile match {
+        case Some(f) => Right(f)
+        case _ => Left("File not found")
+      }
+    }
 
 }
 
