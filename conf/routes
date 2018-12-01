@@ -5,7 +5,7 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
-GET     /:fileId                    controllers.HomeController.renderCodeForm(fileId: String)
+GET     /code/:fileId               controllers.HomeController.renderCodeForm(fileId: String)
 POST    /download/:fileId           controllers.DownloadController.download(fileId: String)
 
 # Map static resources from the /public folder to the /assets URL path

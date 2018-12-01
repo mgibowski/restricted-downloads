@@ -1,6 +1,6 @@
 @import models.form.CodeForm
 @import models.core.RestrictedDownloads.FileId
-@(fileId: FileId, form: Form[CodeForm])(implicit messages: Messages)
+@(fileId: FileId, form: Form[CodeForm])(implicit messagesProvider: MessagesProvider)
 
 @main("Enter download code") {
 
