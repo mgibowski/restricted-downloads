@@ -19,8 +19,8 @@ class DownloadControllerSpec extends PlayWithMongoSpec with Injecting with Befor
 
   var codes: Future[JSONCollection] = _
   var files: Future[JSONCollection] = _
-  val localFileName = "restricted-test-file1.txt"
-  val localFileFullPath = s"/tmp/$localFileName"
+  val fileName = "restricted-test-file1.txt"
+  val localFileFullPath = s"/tmp/$fileName"
 
   before {
     //Init DB
@@ -33,7 +33,7 @@ class DownloadControllerSpec extends PlayWithMongoSpec with Injecting with Befor
       )))
 
       files.flatMap(_.insert[DownloadableFile](ordered = false).many(List(
-        DownloadableFile(fileId = "file1", name = "file1.txt", resource = localFileFullPath,
+        DownloadableFile(fileId = "file1", name = fileName, resource = localFileFullPath,
         expiryDate = LocalDateTime.now().plusDays(3))
       )))
     }
@@ -61,7 +61,7 @@ class DownloadControllerSpec extends PlayWithMongoSpec with Injecting with Befor
       val result = route(app, request).get
 
       status(result) mustBe OK
-      header("Content-Disposition", result) mustBe Some(s"inline; filename=$localFileName")
+      header("Content-Disposition", result).get must include (fileName)
     }
 
   }

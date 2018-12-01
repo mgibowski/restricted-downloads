@@ -52,23 +52,23 @@ object RestrictedDownloadsService {
 import RestrictedDownloadsService._
 
 trait RestrictedDownloadsService[F[_]]{
-  def downloadFile(id: FileId, downloadCode: DownloadCode): F[Either[Error, Resource]]
+  def downloadFile(id: FileId, downloadCode: DownloadCode): F[Either[Error, DownloadableFile]]
 }
 
 final class RestrictedDownloadsModule[F[_]: Monad](DCR: DownloadCodesRepository[F], DFR: DownloadFilesRepository[F])
   extends RestrictedDownloadsService[F] {
 
-  private def getFile(id: FileId): F[Either[Error, Resource]] =
+  private def getFile(id: FileId): F[Either[Error, DownloadableFile]] =
     for {
       file <- DFR.getFile(id)
       fileResult = file match {
         case Left(_) => Left(FileNotFound)
         case Right(f) if f.expiryDate.isBefore(LocalDateTime.now()) => Left(FileNotAvailableAnymore)
-        case Right(f) => Right(f.resource)
+        case Right(f) => Right(f)
       }
     } yield fileResult
 
-  override def downloadFile(id: FileId, downloadCode: DownloadCode): F[Either[Error, Resource]] =
+  override def downloadFile(id: FileId, downloadCode: DownloadCode): F[Either[Error, DownloadableFile]] =
     for {
       codeState <- DCR.isCodeValid(id, downloadCode)
       file <- getFile(id)

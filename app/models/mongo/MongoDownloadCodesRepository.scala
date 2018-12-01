@@ -1,7 +1,7 @@
 package models.mongo
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.core.DownloadCodesRepository
 import models.core.DownloadCodesRepository._
 import models.core.RestrictedDownloads.{DownloadCode, FileId}
@@ -15,6 +15,7 @@ import reactivemongo.play.json._
 
 import scala.concurrent.Future
 
+@Singleton
 class MongoDownloadCodesRepository @Inject() (val reactiveMongoApi: ReactiveMongoApi, config: Configuration)
   extends DownloadCodesRepository[Future] with ReactiveMongoComponents{
 

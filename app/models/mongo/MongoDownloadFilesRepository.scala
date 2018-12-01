@@ -3,7 +3,7 @@ package models.mongo
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.time.LocalDateTime
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.core.{DownloadFilesRepository, RestrictedDownloads}
 import models.core.DownloadFilesRepository.FileNotFound
 import models.core.RestrictedDownloads._
@@ -16,6 +16,7 @@ import reactivemongo.play.json._
 
 import scala.concurrent.Future
 
+@Singleton
 class MongoDownloadFilesRepository @Inject() (val reactiveMongoApi: ReactiveMongoApi, config: Configuration)
   extends DownloadFilesRepository[Future] with ReactiveMongoComponents{
 
