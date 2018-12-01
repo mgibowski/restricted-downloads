@@ -2,17 +2,16 @@ package models.mongo
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.time.LocalDateTime
+
 import javax.inject.Inject
 import models.core.{DownloadFilesRepository, RestrictedDownloads}
-import models.core.DownloadFilesRepository._
 import models.core.DownloadFilesRepository.FileNotFound
 import models.core.RestrictedDownloads._
 import play.api.Configuration
 import play.modules.reactivemongo._
-import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.collection.JSONCollection
 import play.api.libs.json._
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.play.json._
 
 import scala.concurrent.Future
@@ -23,7 +22,15 @@ class MongoDownloadFilesRepository @Inject() (val reactiveMongoApi: ReactiveMong
   lazy val files: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection("download-files"))
   import MongoDownloadFilesRepository.fmt
 
-  override def listFiles: Future[Seq[RestrictedDownloads.DownloadableFile]] = ???
+  override def listFiles: Future[Seq[RestrictedDownloads.DownloadableFile]] =
+    for {
+      collection <- files
+      r <- collection
+        .find[JsObject, DownloadableFile](Json.obj("expiryDate" -> Json.obj("$gt" -> LocalDateTime.now() )))
+        .cursor[DownloadableFile](ReadPreference.primary).collect[Seq](100, Cursor.FailOnError[Seq[DownloadableFile]]())
+    } yield {
+      r
+    }
 
   override def getFile(id: FileId): Future[Either[FileNotFound, RestrictedDownloads.DownloadableFile]] =
     for {

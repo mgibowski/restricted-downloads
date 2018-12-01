@@ -2,10 +2,7 @@ package it.models.mongo
 
 import java.time.LocalDateTime
 
-import models.core.DownloadFilesRepository
-import models.core.DownloadFilesRepository._
 import models.core.RestrictedDownloads.DownloadableFile
-import models.core.RestrictedDownloadsService.FileNotFound
 import models.mongo.MongoDownloadFilesRepository
 import models.mongo.MongoDownloadFilesRepository._
 import org.scalatest.BeforeAndAfter
@@ -20,16 +17,18 @@ import scala.concurrent.{Await, Future}
 class MongoDownloadFilesRepositorySpec extends PlayWithMongoSpec with BeforeAndAfter {
 
   var files: Future[JSONCollection] = _
+  val file1 = DownloadableFile(fileId = "file1", name = "file.zip", resource = "./file.zip",
+    expiryDate = LocalDateTime.now().plusDays(3))
+  val file2 = DownloadableFile(fileId = "file2", name = "file2.zip", resource = "./file2.zip",
+    expiryDate = LocalDateTime.now().plusDays(4))
+  val file3 = DownloadableFile(fileId = "file3", name = "file3.zip", resource = "./file3.zip",
+    expiryDate = LocalDateTime.now().minusDays(1))
 
   before {
     //Init DB
     await {
       files = reactiveMongoApi.database.map(_.collection("download-files"))
-
-      files.flatMap(_.insert[DownloadableFile](ordered = false).many(List(
-        DownloadableFile(fileId = "file1", name = "file.zip", resource = "./file.zip",
-          expiryDate = LocalDateTime.now().plusDays(3)),
-      )))
+      files.flatMap(_.insert[DownloadableFile](ordered = false).many(List(file1,file2,file3)))
     }
   }
 
@@ -53,6 +52,15 @@ class MongoDownloadFilesRepositorySpec extends PlayWithMongoSpec with BeforeAndA
     }
   }
 
-  // TODO: listing files only that did not expire
+  "MongoDownloadFilesRepository" should {
+    "list only files that did not expire" in {
+      val sut = app.injector.instanceOf(classOf[MongoDownloadFilesRepository])
+      val f = sut.listFiles
+      val response = Await.result(f, Duration.Inf)
+      response should have length 2
+      response should contain (file1)
+      response should contain (file2)
+    }
+  }
 
 }
