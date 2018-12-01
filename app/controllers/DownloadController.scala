@@ -26,14 +26,15 @@ class DownloadController @Inject()(val filesRepo: MongoDownloadFilesRepository,
       _ <- codesRepo.bumpUseLimit(fileId, code)
     } yield {
       result match {
-        case Left(FileNotFound) => NotFound("The file you ask for does not exist")
-        case Left(FileNotAvailableAnymore) => NotFound("File is no longer available")
-        case Left(CodeNotCorrect) => BadRequest("The provided code is not correct")
-        case Left(CodeLimitUsageExhausted) => BadRequest("The provided code has reached it's limit usage")
+        case Left(FileNotFound) => NotFound(views.html.error("The file you ask for does not exist"))
+        case Left(FileNotAvailableAnymore) => NotFound(views.html.error("File is no longer available"))
+        case Left(CodeNotCorrect) => BadRequest(views.html.error("The provided code is not correct"))
+        case Left(CodeLimitUsageExhausted) => BadRequest(views.html.error("The provided code has reached it's limit usage"))
         case Right(f) =>
           Ok.sendFile(
             content = new java.io.File(f.resource),
-            fileName = _ => f.name
+            fileName = _ => f.name,
+            inline = false
           )
       }
     }
