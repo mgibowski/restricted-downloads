@@ -13,7 +13,7 @@
           <p class="lead text-muted">Currently there are no files here. Come back soon.</p>
         }else {
 
-          <h1 class="jumbotron-heading">Choose file to download:</h1>
+          <h1 class="jumbotron-heading">Choose file to download</h1>
 
           @files.map{ f=>
             <p class="lead text-muted"><a href="@routes.HomeController.renderCodeForm(f.fileId)">@f.title</a></p>
