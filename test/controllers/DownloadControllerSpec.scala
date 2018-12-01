@@ -29,12 +29,17 @@ class DownloadControllerSpec extends PlayWithMongoSpec with Injecting with Befor
       files = reactiveMongoApi.database.map(_.collection("download-files"))
 
       codes.flatMap(_.insert[DownloadCodeItem](ordered = false).many(List(
-        DownloadCodeItem(fileId = "file1", code = "correctCode", useCount = 1)
+        DownloadCodeItem(fileId = "file1", code = "correctCode", useCount = 1),
+        DownloadCodeItem(fileId = "file1", code = "usedCode", useCount = 5),
+        DownloadCodeItem(fileId = "file2", code = "correctCode", useCount = 1),
+        DownloadCodeItem(fileId = "xyz", code = "codeWithoutFile", useCount = 1)
       )))
 
       files.flatMap(_.insert[DownloadableFile](ordered = false).many(List(
         DownloadableFile(fileId = "file1", name = fileName, resource = localFileFullPath,
-        expiryDate = LocalDateTime.now().plusDays(3))
+        expiryDate = LocalDateTime.now().plusDays(3)),
+        DownloadableFile(fileId = "file2", name = fileName, resource = localFileFullPath,
+        expiryDate = LocalDateTime.now().minusDays(1)),
       )))
     }
 
@@ -62,6 +67,38 @@ class DownloadControllerSpec extends PlayWithMongoSpec with Injecting with Befor
 
       status(result) mustBe OK
       header("Content-Disposition", result).get must include (fileName)
+    }
+
+    "respond with error when file does not exist" in {
+      val request = FakeRequest(POST, "/download/xyz").withFormUrlEncodedBody("code" -> "codeWithoutFile")
+      val result = route(app, request).get
+
+      status(result) mustBe NOT_FOUND
+      contentAsString(result) must include ("The file you ask for does not exist")
+    }
+
+    "respond with error when file is no longer available" in {
+      val request = FakeRequest(POST, "/download/file2").withFormUrlEncodedBody("code" -> "correctCode")
+      val result = route(app, request).get
+
+      status(result) mustBe NOT_FOUND
+      contentAsString(result) must include ("File is no longer available")
+    }
+
+    "respond with error when provided code is not correct" in {
+      val request = FakeRequest(POST, "/download/file1").withFormUrlEncodedBody("code" -> "wrongCode")
+      val result = route(app, request).get
+
+      status(result) mustBe BAD_REQUEST
+      contentAsString(result) must include ("The provided code is not correct")
+    }
+
+    "respond with error when code use limit is reached" in {
+      val request = FakeRequest(POST, "/download/file1").withFormUrlEncodedBody("code" -> "usedCode")
+      val result = route(app, request).get
+
+      status(result) mustBe BAD_REQUEST
+      contentAsString(result) must include ("The provided code has reached it's limit usage")
     }
 
   }
