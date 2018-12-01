@@ -2,6 +2,7 @@ package controllers
 
 import java.io.File
 
+import akka.util.ByteString
 import controllers.FakeFilesRepository._
 import models.mongo.{MongoDownloadCodesRepository, MongoDownloadFilesRepository}
 import org.scalatest.BeforeAndAfter
@@ -9,6 +10,8 @@ import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.streams.Accumulator
+import play.api.mvc.Result
 import play.api.test.Helpers._
 import play.api.test._
 
@@ -31,7 +34,7 @@ class DownloadControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injec
   }
 
   override def fakeApplication = new GuiceApplicationBuilder()
-    .overrides(bind[MongoDownloadFilesRepository].to[FakeFilesRepository])
+    .overrides(bind[MongoDownloadFilesRepository].to[FakeFilesRepositoryComponent])
     .overrides(bind[MongoDownloadCodesRepository].to[FakeCodesRepository])
     .disable[play.modules.reactivemongo.ReactiveMongoModule]
     .build()

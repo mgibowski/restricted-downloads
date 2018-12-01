@@ -28,7 +28,7 @@ class RestrictedDownloadsModuleTest extends FlatSpec {
     override def getFile(id: FileId): Scalaz.Id[Either[FileNotFound, RestrictedDownloads.DownloadableFile]] =
       id match {
         case "NotFound" => Left("File not found")
-        case _ => Right(DownloadableFile(id, "Name", "Resource", expiryDate))
+        case _ => Right(DownloadableFile(id, "Name", "Title", "Resource", expiryDate))
       }
   }
 

@@ -8,8 +8,9 @@ object RestrictedDownloads {
   type DownloadCode = String
   type Resource = String
   type FileName = String
+  type Title = String
   type FileId = String
-  case class DownloadableFile(fileId: FileId, name: FileName, resource: Resource, expiryDate: LocalDateTime)
+  case class DownloadableFile(fileId: FileId, name: FileName, title: Title, resource: Resource, expiryDate: LocalDateTime)
 }
 
 import RestrictedDownloads._

@@ -1,5 +1,15 @@
-@()
+@import models.core.RestrictedDownloads
+@(files: Seq[RestrictedDownloads.DownloadableFile])
 
 @main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
+  @if(files.isEmpty) {
+    <p>Currently, there are no files here. Come back soon.</p>
+  }else {
+    <h1>Choose the file you would like to download:</h1>
+    <ul>
+      @files.map{ f=>
+        <li>@f.title</li>
+      }
+    </ul>
+  }
 }

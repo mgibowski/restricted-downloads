@@ -17,11 +17,11 @@ import scala.concurrent.{Await, Future}
 class MongoDownloadFilesRepositorySpec extends PlayWithMongoSpec with BeforeAndAfter {
 
   var files: Future[JSONCollection] = _
-  val file1 = DownloadableFile(fileId = "file1", name = "file.zip", resource = "./file.zip",
+  val file1 = DownloadableFile(fileId = "file1", title = "file1", name = "file.zip", resource = "./file.zip",
     expiryDate = LocalDateTime.now().plusDays(3))
-  val file2 = DownloadableFile(fileId = "file2", name = "file2.zip", resource = "./file2.zip",
+  val file2 = DownloadableFile(fileId = "file2", title = "file2", name = "file2.zip", resource = "./file2.zip",
     expiryDate = LocalDateTime.now().plusDays(4))
-  val file3 = DownloadableFile(fileId = "file3", name = "file3.zip", resource = "./file3.zip",
+  val file3 = DownloadableFile(fileId = "file3", title = "file3", name = "file3.zip", resource = "./file3.zip",
     expiryDate = LocalDateTime.now().minusDays(1))
 
   before {
