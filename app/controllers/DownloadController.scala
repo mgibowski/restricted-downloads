@@ -5,8 +5,7 @@ import models.core.RestrictedDownloads.FileId
 import models.core.RestrictedDownloadsModule
 import models.core.RestrictedDownloadsService._
 import models.mongo.{MongoDownloadCodesRepository, MongoDownloadFilesRepository}
-import play.api.data.Forms._
-import play.api.data._
+import models.form.CodeForm._
 import play.api.mvc._
 import scalaz.Scalaz._
 
@@ -20,10 +19,7 @@ class DownloadController @Inject()(val filesRepo: MongoDownloadFilesRepository,
 
   val coreLogic = new RestrictedDownloadsModule[Future](codesRepo, filesRepo)
 
-  case class DownloadForm(code: String)
-  val downloadForm = Form(mapping("code" -> nonEmptyText)(DownloadForm.apply)(DownloadForm.unapply))
-
-  def download(fileId: FileId) = Action.async(parse.form(downloadForm)) { implicit request =>
+  def download(fileId: FileId) = Action.async(parse.form(downloadCodeForm)) { implicit request =>
     val code = request.body.code
     for {
       result <- coreLogic.downloadFile(fileId, code)

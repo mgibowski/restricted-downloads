@@ -1,6 +1,7 @@
 package controllers
 
 import javax.inject._
+import models.core.RestrictedDownloads.FileId
 import models.mongo.MongoDownloadFilesRepository
 import play.api.mvc._
 
@@ -15,5 +16,9 @@ class HomeController @Inject()(filesRepo:  MongoDownloadFilesRepository, cc: Con
     } yield {
       Ok(views.html.index(files))
     }
+  }
+
+  def renderCodeForm(fileId: FileId) = Action{ implicit request: Request[AnyContent] =>
+    Ok("")
   }
 }

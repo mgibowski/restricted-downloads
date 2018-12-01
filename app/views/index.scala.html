@@ -8,7 +8,7 @@
     <h1>Choose the file you would like to download:</h1>
     <ul>
       @files.map{ f=>
-        <li>@f.title</li>
+        <li><a href="@routes.HomeController.renderCodeForm(f.fileId)">@f.title</a></li>
       }
     </ul>
   }

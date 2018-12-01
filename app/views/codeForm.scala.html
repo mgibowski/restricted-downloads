@@ -1,0 +1,11 @@
+@import models.form.CodeForm
+@import models.core.RestrictedDownloads.FileId
+@(fileId: FileId, form: Form[CodeForm])(implicit messages: Messages)
+
+@main("Enter download code") {
+
+  @helper.form(action = routes.DownloadController.download(fileId)) {
+    @helper.inputText(form("code"))
+  }
+
+}
