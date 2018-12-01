@@ -9,7 +9,7 @@ object RestrictedDownloads {
   type Resource = String
   type FileName = String
   type FileId = String
-  case class DownloadableFile(id: FileId, name: FileName, resource: Resource, expiryDate: LocalDateTime)
+  case class DownloadableFile(fileId: FileId, name: FileName, resource: Resource, expiryDate: LocalDateTime)
 }
 
 import RestrictedDownloads._
