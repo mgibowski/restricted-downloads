@@ -2,7 +2,6 @@ package controllers
 
 import java.io.File
 
-import akka.util.ByteString
 import controllers.FakeFilesRepository._
 import models.mongo.{MongoDownloadCodesRepository, MongoDownloadFilesRepository}
 import org.scalatest.BeforeAndAfter
@@ -10,8 +9,6 @@ import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.streams.Accumulator
-import play.api.mvc.Result
 import play.api.test.Helpers._
 import play.api.test._
 
@@ -84,7 +81,7 @@ class DownloadControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injec
       val request = FakeRequest(POST, "/download/file1").withFormUrlEncodedBody("code" -> "usedCode")
       val result = route(app, request).get
 
-      contentAsString(result) must include ("The provided code has reached it's limit usage")
+      contentAsString(result) must include ("The provided code has reached")
       status(result) mustBe BAD_REQUEST
     }
 
